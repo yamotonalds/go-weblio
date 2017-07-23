@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 func main() {
@@ -17,6 +19,17 @@ func main() {
 			break
 		}
 
-		fmt.Println(word)
+		doc, err := goquery.NewDocument("http://ejje.weblio.jp/content/" + word)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: 翻訳ページが読み込めませんでした(%v)\n", word, err)
+		}
+
+		contentExplanation := doc.Find(".content-explanation").First()
+		if contentExplanation == nil {
+			fmt.Fprintf(os.Stderr, "%s: 翻訳が見つかりませんでした", word)
+		}
+		translated := contentExplanation.Text()
+
+		fmt.Println(translated)
 	}
 }
